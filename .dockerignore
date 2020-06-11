@@ -1,0 +1,15 @@
+buildozer/bin
+buildozer/dist
+buildozer/.buildozer
+sources/*.archive
+sources/*.download
+dist
+__pycache__
+.git
+.gitignore
+.project
+.pydevproject
+utils
+triblerd.spec
+toolchain.json
+README.md

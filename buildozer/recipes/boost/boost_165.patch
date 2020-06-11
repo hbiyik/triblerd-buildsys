@@ -1,0 +1,69 @@
+diff -u -r boost_1_65_0/boostcpp.jam boost_1_65_0_new/boostcpp.jam
+--- boost_1_65_0/boostcpp.jam	2017-08-19 18:49:36.000000000 +0200
++++ boost_1_65_0_new/boostcpp.jam	2020-06-08 15:01:57.653661014 +0200
+@@ -156,6 +156,7 @@
+           ! [ $(property-set).get <target-os> ] in windows cygwin darwin aix &&
+           ! [ $(property-set).get <toolset> ] in pgi
+         {
++            return $(result) ;
+             result = $(result).$(BOOST_VERSION)  ;
+         }
+ 
+diff -u -r boost_1_65_0/libs/filesystem/src/operations.cpp boost_1_65_0_new/libs/filesystem/src/operations.cpp
+--- boost_1_65_0/libs/filesystem/src/operations.cpp	2017-08-19 18:49:40.000000000 +0200
++++ boost_1_65_0_new/libs/filesystem/src/operations.cpp	2020-06-08 14:55:42.230372670 +0200
+@@ -69,6 +69,22 @@
+ 
+ # ifdef BOOST_POSIX_API
+ 
++#  if defined(__ANDROID__)
++#  define truncate libboost_truncate_wrapper
++// truncate() is present in Android libc only starting from ABI 21, so here's a simple wrapper
++static int libboost_truncate_wrapper(const char *path, off_t length)
++{
++  int fd = open(path, O_WRONLY);
++  if (fd == -1) {
++    return -1;
++  }
++  int status = ftruncate(fd, length);
++  close(fd);
++  return status;
++}
++#  endif
++
++
+ #   include <sys/types.h>
+ #   include <sys/stat.h>
+ #   if !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__ANDROID__) \
+diff -u -r boost_1_65_0/libs/python/src/converter/builtin_converters.cpp boost_1_65_0_new/libs/python/src/converter/builtin_converters.cpp
+--- boost_1_65_0/libs/python/src/converter/builtin_converters.cpp	2017-08-19 18:49:45.000000000 +0200
++++ boost_1_65_0_new/libs/python/src/converter/builtin_converters.cpp	2020-06-08 15:13:24.266325302 +0200
+@@ -45,11 +45,16 @@
+   {
+       return PyString_Check(obj) ? PyString_AsString(obj) : 0;
+   }
+-#else
++#elif PY_VERSION_HEX < 0x03070000
+   void* convert_to_cstring(PyObject* obj)
+   {
+       return PyUnicode_Check(obj) ? _PyUnicode_AsString(obj) : 0;
+   }
++#else
++  void* convert_to_cstring(PyObject* obj)
++  {
++      return PyUnicode_Check(obj) ? const_cast<void*>(reinterpret_cast<const void*>(_PyUnicode_AsString(obj))) : 0;
++  }
+ #endif
+ 
+   // Given a target type and a SlotPolicy describing how to perform a
+diff -u -r boost_1_65_0/tools/build/src/tools/python.jam boost_1_65_0_new/tools/build/src/tools/python.jam
+--- boost_1_65_0/tools/build/src/tools/python.jam	2017-08-19 18:49:50.000000000 +0200
++++ boost_1_65_0_new/tools/build/src/tools/python.jam	2020-06-08 15:03:29.794244008 +0200
+@@ -650,6 +650,7 @@
+         case *bsd : return  <library>pthread <toolset>gcc:<library>util ;
+ 
+         case aix : return  <library>pthread <library>dl ;
++        case * : return ; # use Android builtin lib
+ 
+         case * : return  <library>pthread <library>dl
+             <toolset>gcc:<library>util <toolset-intel:platform>linux:<library>util ;

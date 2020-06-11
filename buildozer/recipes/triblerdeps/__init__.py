@@ -1,0 +1,68 @@
+
+from pythonforandroid.recipe import PythonRecipe
+
+class TriblerDepsRecipe(PythonRecipe):
+    name = 'triblerdeps'
+    version = '0.0.1'
+    depends = ["libsodium",
+              "libffi",
+              "python3",
+              "libtorrent", 
+              "cryptography",
+              "setuptools",
+              "sdl2",
+              "kivy",
+              "bitcoinlib",
+              "chardet",
+              "configobj",
+              "decorator",
+              "dnspython",
+              "ecdsa",
+              "feedparser",
+              "jsonrpclib",
+              "netifaces",
+              "networkx",
+              "pbkdf2",
+              "pony",
+              "protobuf",
+              "psutil",
+              "pyaes",
+              "pyasn1",
+              "pyasn1-modules",
+              "pycparser",
+              "pysocks",
+              "requests",
+              "PyOpenSSL",
+              "pynacl",
+              "service_identity",
+              "networkx",
+              "aiohttp",
+              "aiohttp_apispec",
+              "pyyaml",
+              "marshmallow",
+              "netifaces",
+              "asynctest",
+              "multidict",
+              "attrs",
+              "apispec",
+              "async_timeout",
+              "certifi",
+              "chardet",
+              "idna",
+              "Jinja2",
+              "jsonrpclib",
+              "lz4",
+              "MarkupSafe",
+              "scrypt",
+              "six",
+              "SQLAlchemy",
+              "urllib3",
+              "webargs",
+              "yarl",
+              "libnacl",
+              "nose"]
+
+    def install_python_package(self, arch, name=None, env=None, is_dir=True):
+        pass
+
+recipe = TriblerDepsRecipe()

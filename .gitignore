@@ -1,0 +1,17 @@
+/dist/*
+*.pyc
+*.pyo
+__pycache__
+/buildozer/dist
+/buildozer/bin
+/buildozer/.buildozer
+/sources/boost*
+/sources/libsodium*
+/sources/libtorrent*
+/sources/openssl*
+/sources/perl*
+/sources/python*
+/sources/Python*
+/sources/libffi*
+/sources/cryptography*
+/sources/sqlite*

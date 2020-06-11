@@ -1,0 +1,97 @@
+diff -ur libtorrent-libtorrent-1_1_5/bindings/python/Jamfile libtorrent-libtorrent-1_1_5_new/bindings/python/Jamfile
+--- libtorrent-libtorrent-1_1_5/bindings/python/Jamfile	2017-10-14 13:54:43.000000000 +0200
++++ libtorrent-libtorrent-1_1_5_new/bindings/python/Jamfile	2020-06-11 00:20:05.665363107 +0200
+@@ -9,8 +9,8 @@
+ 
+ BOOST_ROOT = [ modules.peek : BOOST_ROOT ] ;
+ 
+-feature visibility : default hidden : composite ;
+-feature.compose <visibility>hidden : <cflags>-fvisibility=hidden <cxxflags>-fvisibility-inlines-hidden ;
++feature lt-visibility : default hidden : composite ;
++feature.compose <lt-visibility>hidden : <cflags>-fvisibility=hidden <cxxflags>-fvisibility-inlines-hidden ;
+ 
+ feature libtorrent-link : shared static : composite propagated ;
+ feature libtorrent-python-pic : off on : composite propagated link-incompatible ;
+@@ -19,7 +19,7 @@
+ if $(BOOST_ROOT)
+ {
+ 	use-project /boost : $(BOOST_ROOT) ;
+-	alias boost_python : /boost/python//boost_python : : : <include>$(BOOST_ROOT) ;
++    alias boost_python : /boost/python//boost_python3 : : : <include>$(BOOST_ROOT) ;
+ }
+ else
+ {
+@@ -61,11 +61,11 @@
+       || <toolset>clang in $(properties)
+       || <toolset>clang-darwin in $(properties)
+     {
+-        result += <visibility>hidden ;
++        result += <lt-visibility>hidden ;
+ 
+         if ( <toolset>gcc in $(properties) )
+         {
+-           result += <linkflags>-Wl,-Bsymbolic ;
++			 result += <linkflags>-Wl,-soname=libtorrent.so,-Bsymbolic ;
+         }
+     }
+ 
+diff -ur libtorrent-libtorrent-1_1_5/bindings/python/setup.py libtorrent-libtorrent-1_1_5_new/bindings/python/setup.py
+--- libtorrent-libtorrent-1_1_5/bindings/python/setup.py	2017-10-14 13:54:43.000000000 +0200
++++ libtorrent-libtorrent-1_1_5_new/bindings/python/setup.py	2020-06-08 15:17:07.193894159 +0200
+@@ -123,7 +123,7 @@
+ 		if 'CXXFLAGS' in os.environ:
+ 			os.environ['CFLAGS'] = os.environ['CXXFLAGS']
+ 
+-		ext = [Extension('libtorrent',
++		ext = [Extension('libtorrent_rasterbar',
+ 			sources = sorted(source_list),
+ 			language='c++',
+ 			include_dirs = flags.include_dirs,
+@@ -132,7 +132,7 @@
+ 			extra_compile_args = extra_compile + arch() + target_specific(),
+ 			libraries = ['torrent-rasterbar'] + flags.libraries)]
+ 
+-setup(name = 'python-libtorrent',
++setup(name = 'libtorrent',
+ 	version = '1.1.5',
+ 	author = 'Arvid Norberg',
+ 	author_email = 'arvid@libtorrent.org',
+diff -ur libtorrent-libtorrent-1_1_5/Jamfile libtorrent-libtorrent-1_1_5_new/Jamfile
+--- libtorrent-libtorrent-1_1_5/Jamfile	2017-10-14 13:54:43.000000000 +0200
++++ libtorrent-libtorrent-1_1_5_new/Jamfile	2020-06-08 15:23:10.903473014 +0200
+@@ -229,17 +229,17 @@
+ 	{
+ 		result += <cflags>-Wall ;
+ 		result += <cflags>-Wextra ;
+-		result += <cflags>-Wpedantic ;
++#		result += <cflags>-Wpedantic ;
+ #		result += <cflags>-Wmisleading-indentation ;
+ 		result += <cflags>-Wparentheses ;
+-		result += <cflags>-Wvla ;
+-		result += <cxxflags>-Wc++11-compat ;
++#		result += <cflags>-Wvla ;
++#		result += <cxxflags>-Wc++11-compat ;
+ 		result += <cflags>-Wno-format-zero-length ;
+ 		result += <cflags>-Wno-long-long ;
+ 
+ # enable these warnings again, once the other ones are dealt with
+-		result += <cflags>-Wno-sign-compare ;
+-		result += <cflags>-Wno-unused-variable ;
++#		result += <cflags>-Wno-sign-compare ;
++#		result += <cflags>-Wno-unused-variable ;
+ 	}
+ 
+ 	if <toolset>msvc in $(properties)
+@@ -340,6 +340,7 @@
+ 	if $(type) = SHARED_LIB &&
+ 		( ! ( [ $(property-set).get <target-os> ] in windows cygwin ) )
+ 	{
++		return "libtorrent_rasterbar.so" ; # linked by python bindings .so
+ 		name = $(name).$(VERSION) ;
+ 	}
+ 
+@@ -857,3 +858,4 @@
+ 	: $(headers)
+ 	;
+ 
++
