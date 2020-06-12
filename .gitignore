@@ -3,6 +3,7 @@
 __pycache__
 /buildozer/bin
 /buildozer/.buildozer
+/sources/qemu*
 /sources/boost*
 /sources/libsodium*
 /sources/libtorrent*

@@ -46,7 +46,7 @@ if __name__ == "__main__":
             cmd = "docker build -t %s \
                   %s \
                   --build-arg BASE=%s \
-                  --build-arg QEMU_STATIC=qemu/qemu-%s-static \
+                  --build-arg QEMU_STATIC=sources/qemu-%s-static \
                   --build-arg THREADS=%s \
                   --build-arg PYVER=%s \
                   --build-arg OPENSSL_PLATFORM=%s \

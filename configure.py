@@ -19,6 +19,8 @@ with open("packages.json") as f:
 
 PYVER = ".".join(packages["python"][0].split(".")[:2])
 
+qemurepo = "https://github.com/multiarch/qemu-user-static/releases/download/v5.0.0-2/"
+
 config = {"images":
             {"linux-i386":
                 {"base": "debian/eol:lenny-slim@sha256:a2230f615ba41081b6727b32234275064e4f53de77dc94765fcaa24489d6f930",
@@ -90,10 +92,13 @@ def findsourcedir(package):
 # sync qemu
 for image in config["images"]:
     if config["images"][image].get("qemu-platform"):
-        qemu = "qemu-%s-static" % config["images"][image]["qemu-platform"]
-        if not os.path.exists("qemu/%s" % qemu):
-            shutil.copy2("/usr/bin/%s" % qemu, "qemu/%s" % qemu)
-
+        url = "%sx86_64_qemu-%s-static.tar.gz" % (qemurepo,
+                                                   config["images"][image]["qemu-platform"])
+        binname = "qemu-%s-static" % config["images"][image]["qemu-platform"]
+        if not os.path.exists("sources/%s" % binname):
+            logging.info("Downloading Qemu : %s", url)
+            urllib.request.urlretrieve(url, "sources/%s.archive" % binname)
+            shutil.unpack_archive("sources/%s.archive" % binname, "sources", "gztar")
 
 # sync packages
 for package, (version, url) in packages.items():
