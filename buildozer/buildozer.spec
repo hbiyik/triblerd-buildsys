@@ -17,6 +17,8 @@ android.logcat_filters = *:S python:V DEBUG:V
 android.arch = armeabi-v7a
 p4a.local_recipes = recipes
 p4a.bootstrap = sdl2
+android.ndk = 19b
+android.ndk_api = 21
 
 [buildozer]
 log_level = 2

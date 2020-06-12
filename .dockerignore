@@ -11,5 +11,4 @@ __pycache__
 .pydevproject
 utils
 triblerd.spec
-toolchain.json
 README.md

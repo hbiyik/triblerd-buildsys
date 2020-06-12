@@ -13,7 +13,9 @@ import shlex
 import pprint
 import json
 import configure
+from configparser import SafeConfigParser
 
+    
 def runcmd(cmd):
     return  subprocess.Popen(shlex.split(cmd), 
                              stdout=subprocess.PIPE, 
@@ -39,6 +41,18 @@ if __name__ == "__main__":
     for dep, depver in configure.config["deps"].items():
         depdata += "--build-arg %s_SRC=/home/%s " % (dep.upper(),
                                                      configure.findsourcedir(dep))
+
+    # load the old toolchain file
+    toolchain = dict(configure.config)
+    try:
+        with open("dist/toolchain.json") as f:
+            extoolchain = json.loads(f)
+        for image, imagedata in extoolchain["images"].items():
+            toolchain["images"][image]["toolchain"] = imagedata["toolchain"]
+    except Exception:
+        pass
+
+    failure = False
     for image, cfg in configure.config["images"].items():
         if image in images:
             imagename = "%s/%s-%s" % (configure.DOCKER_USERNAME, configure.DOCKER_IMAGENAME, image)
@@ -59,15 +73,34 @@ if __name__ == "__main__":
                                         cfg["openssl-platform"],
                                         targetos
                                         )
+            logging.info("Start building image :%s" % image)
             logging.info(cmd)
             if os.system(cmd):
+                failure = True
+                logging.error("Failed to build image:  %s" % image)
                 break
             if targetos == "linux":
-                sout, serr = runcmd("docker run -t %s gcc --version" % imagename)
-                configure.config["images"][image]["toolchain"]["gcc"] = re.search("([0-9]+\.[0-9]+\.[0-9]+)", str(sout)).group(1)
+                # get glibc version
                 sout, serr = runcmd("docker run -t %s ldd --version" % imagename)
-                configure.config["images"][image]["toolchain"]["glibc"] = re.search("([0-9]+\.[0-9]+)", str(sout)).group(1)
-
-    logging.info("build finished with config \r\n %s", pprint.pformat(configure.config))
-    with open("toolchain.json", "w") as f:
-        f.write(json.dumps(configure.config))
+                toolchain["images"][image]["toolchain"]["glibc"] = re.search("([0-9]+\.[0-9]+)", str(sout)).group(1)
+            if targetos in ["linux", "android"]:
+                # get gcc version
+                sout, serr = runcmd("docker run -t %s gcc --version" % imagename)
+                toolchain["images"][image]["toolchain"]["gcc"] = re.search("([0-9]+\.[0-9]+\.[0-9]+)", str(sout)).group(1)
+                # get clang version
+                sout, serr = runcmd("docker run -t %s clang --version" % imagename)
+                if not serr:
+                    toolchain["images"][image]["toolchain"]["clang"] = re.search("([0-9\.\-]+)\s", str(sout)).group(1)
+            if targetos == "android":
+                bldzrconfig = SafeConfigParser()
+                bldzrconfig.read('buildozer/buildozer.spec')
+                # get ndk version
+                toolchain["images"][image]["toolchain"]["ndk"] = bldzrconfig.get("app","android.ndk")
+                # get min ndk api
+                toolchain["images"][image]["toolchain"]["ndkminapi"] = bldzrconfig.get("app","android.ndk_api")
+            with open("dist/toolchain.json", "w") as f:
+                f.write(json.dumps(toolchain))
+            logging.info("Successfully built image :%s" % image)
+    
+    if not failure:
+        logging.info("build finished with config \r\n %s", pprint.pformat(configure.config))
