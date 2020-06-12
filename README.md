@@ -166,3 +166,6 @@ for running the unittests
 
 **Q.** Is it possbile to build other app with this
 **A.** Yes the system is very versatile and can be extended with any more dependencies
+
+**Q.** The main file for android is very limited
+**A.** Android kivy app is just a place holder, a seperate kivy app should be developed. Since the core is running, the app may only utilize the android ui and core service. 
