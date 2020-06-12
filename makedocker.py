@@ -87,11 +87,10 @@ if __name__ == "__main__":
                 # get gcc version
                 sout, serr = runcmd("docker run -t %s gcc --version" % imagename)
                 toolchain["images"][image]["toolchain"]["gcc"] = re.search("([0-9]+\.[0-9]+\.[0-9]+)", str(sout)).group(1)
+            if targetos == "android":
                 # get clang version
                 sout, serr = runcmd("docker run -t %s clang --version" % imagename)
-                if not serr:
-                    toolchain["images"][image]["toolchain"]["clang"] = re.search("([0-9\.\-]+)\s", str(sout)).group(1)
-            if targetos == "android":
+                toolchain["images"][image]["toolchain"]["clang"] = re.search("([0-9\.\-]+)\s", str(sout)).group(1)
                 bldzrconfig = SafeConfigParser()
                 bldzrconfig.read('buildozer/buildozer.spec')
                 # get ndk version

@@ -35,6 +35,7 @@ ARG PYTHON_SRC
 RUN cd ${PYTHON_SRC} && \
  	ln -s /usr/include/*-linux-*/*.h /usr/include/ && \
  	cp /home/sources/patches/semaphore.pymp ${PYTHON_SRC}/Modules/_multiprocessing/semaphore.c && \
+ 	cp /home/sources/patches/Makefile.pre.pyin ${PYTHON_SRC}/Makefile.pre.in && \
 	./configure --with-system-ffi --enable-shared && \
 	make -j${THREADS} && make -j1 install && \
 	cp libpython*.so* /usr/lib/ && \
