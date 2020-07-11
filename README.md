@@ -20,6 +20,7 @@ Each and every dependency is build for the target and stored in a docker contain
  Toolchain dependencies (in the sense i will use in this context to prevent philosophical discussions) is to sum of the dependencies of the generated binaries. They can be either hardware variations or software variations.
  
 **1.Hardware Variants & Features**
+
 **1.1. Target CPU Instruction Set Architecture (ISA):** 
 - Intel X86 32bit (Supported: i386)
 - Amd X86 64 bit (Supported: amd64)
@@ -31,7 +32,7 @@ Each and every dependency is build for the target and stored in a docker contain
 	
 **1.2. Co-processor Variants:**
 Co processor is a hardware extension to the CPU where the main CPU (ALU) can pass some certain task to it, so they can be performed more efficiently and and faster. For x86 architecture, co-processors are defined by the architecture itself (ie: MMX, SSE ie See: https://en.wikipedia.org/wiki/X86#Extensions) so they dont create a dependency but for ARM they are a dependency. (see: https://image.slidesharecdn.com/eurollvm-2016-arm-code-size-160318212149/95/a-close-look-at-arm-code-size-6-638.jpg) 
-- VFPUv2 >= armv5 (not supported, use soft floting point armel variant)
+- VFPUv2 >= armv5 (arm6hf, use soft floting point armel variant for armv5)
 - VFPUv3 >= armv7 (armhf supports armv7 ISA together with VFPUv3 floating point built binaries)
 - NEON >= armv7 (armhf for armv7 ISA, aarch64 for armv8)
 - CRYPTO >= armv8 (supported in ararch64)
@@ -49,13 +50,15 @@ CPUs may interpret the byte code LSB first MSB first. For the cpu types which us
 - Little Endian  (Everthing is little endian here)
 
 **2. Software Dependencies:**
+
 **2.1. The Kernel**
 In linux kernels, software projects generally (unless they are very special or driver) don't directly interact with linux kernel for standard operation, instead the C library does that for us, however in windows it is possible to interact directly not with kernel but windows libraries, we will not go through this route. All of the dependencies in this build system is using a C library to interact with the kernel.
-- Windows: (not supported yet but can be extended with wine + cross compilers)
+- Windows: (Supported)
 - Linux: Supported
 - Android: Supported
 	
 **2.2. The C Library**
+
 **2.2.1 GNU C Library (Supported):**
 	In linux for most of the distros or custom OSes the C library is GNU C library. The GNU C library is only backwards compatible not forward compatible, if the system glibc library in 2.5, but your binary is compiled with 2.30 the binary will work fine. But the vice verse is not possible. The approach in this build-system is to use the oldest GNUC library for the CPU target which was released. Ie: For i386 target, glibc version is 2.7 but for aarch64 2.20. This is ok because arm64 was introduced to the market around those years, so there is no practical point to have glic2.5 compatibility for aarch64
 	
@@ -79,12 +82,14 @@ You may think how come the compiler itself is relevant but it is in the case GCC
 - **linux-i386:** practically for any linux distro released more than 10 years ago that that runs on a x64 cpu etiher in 32bit or 64 bit mode
 - **linux-amd64:** same as above but only in 64 bit mode, with better performance and assembly level optimizations
 - **linux-armel:** very old arm based linux distros down to >= armv5
-- **linux-armhf:** most arm7 based devices and linux devices regardless of what kind of SOC it is.
+- **linux-arm6hf:** most arm6 based devices and linux devices regardless of what kind of SOC it is.
+- **linux-armhf:** most arm7 based devices with NEON coprocessor and linux devices regardless of what kind of SOC it is.
 - **linux-aarch64:** nearly all distros with armv8 SOCs.
 - **android-i386:** atom based devices with Android >= 5.0 Lollipop
 - **android-amd64:** atom based devices with Android >= 5.0 Lollipop in 64bit mode
 - **android-armhf:** all android devices with arm>=v7 and Android >=5.0 Lollipop 
 - **android-aarch64:** all android devices with arm>=v8 and Android >=5.0 Lollipop
+- **windows-i386:** all windows devices > win7, (may on lower versions too, not tested)
 
 Those tooolchains above basically cover more than %95 of the devices with linux and android osses.
 
@@ -161,11 +166,17 @@ for running the unittests
 *PS: make sure your android CPU architecture maches.*
 
 **Q&A:**
+
 **Q.** Why there is a custom test runner instead of using nose or some already available test runner
+
 **A.** P4A compiles the python source file to .pyo and nose can not execute the tests unless there is actually a .py file. the custom testrunner.py can execute .pyc files.
 
+
 **Q.** Is it possbile to build other app with this
+
 **A.** Yes the system is very versatile and can be extended with any more dependencies
 
+
 **Q.** The main file for android is very limited
+
 **A.** Android kivy app is just a place holder, a seperate kivy app should be developed. Since the core is running, the app may only utilize the android ui and core service. 

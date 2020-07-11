@@ -3,10 +3,14 @@ FROM ${BASE} as builder
 ARG QEMU_STATIC
 ARG THREADS
 COPY ${QEMU_STATIC} /usr/bin
-COPY sources /home/sources
-RUN apt-get update && apt-get install -y gcc g++ make libc-dev zlib1g-dev \
+RUN apt-get update && \
+	apt-get purge -y ".+\-dev" || true && \
+	apt-get purge -y "libsqlite*" || true && \
+	apt-get autoremove -y && \
+	apt-get install -y gcc g++ make libc-dev zlib1g-dev \
 	libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev libexpat1-dev \
 	uuid-dev libgmp3-dev libffi-dev libgdbm-dev upx
+COPY sources /home/sources
 ARG PERL_SRC
 RUN cd ${PERL_SRC} && \
 	sh Configure -des && \
@@ -14,8 +18,10 @@ RUN cd ${PERL_SRC} && \
 	make install
 ARG OPENSSL_SRC
 ARG OPENSSL_PLATFORM
+ARG OPENSSL_ARG1
+ARG OPENSSL_ARG2
 RUN cd ${OPENSSL_SRC} && \
-	./Configure ${OPENSSL_PLATFORM} shared && \
+	./Configure ${OPENSSL_PLATFORM} ${OPENSSL_ARG1} ${OPENSSL_ARG2} shared && \
 	make -j${THREADS} && \
 	cp ${OPENSSL_SRC}/lib*.so* /usr/lib/ && \
 	cp -rf ${OPENSSL_SRC}/include/openssl /usr/include/
@@ -68,5 +74,30 @@ RUN	python${PYVER} -m pip install --no-binary :all: pycparser cffi && \
 	pyaes pyasn1 pysocks requests PyOpenSSL libnacl service_identity \
 	networkx aiohttp aiohttp_apispec pyyaml marshmallow netifaces asynctest PyInstaller nose && \
 	python${PYVER} -m pip install --no-binary :all: lz4
-FROM ${BASE}
-COPY --from=builder /usr /usr
+
+USER root
+# clean system
+RUN python3 /home/sources/cleandeb.py gcc g++ make libc-dev zlib1g-dev \
+	libncurses5-dev libncursesw5-dev libreadline-dev libbz2-dev libexpat1-dev \
+	uuid-dev libgmp3-dev libffi-dev libgdbm-dev upx upx-ucl apt apt-get apt-cache e2fsprogs fdisk base-passwd \
+	&& ./cleandeb.sh \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /home/* \
+    && userdel pi || true \
+    && groupdel pi || true \
+    && groupadd group \
+    && useradd -m -g group user \
+    && chsh -s /bin/bash user \
+    && mkdir -p /work \
+    && chown -R user:group /work \
+	&& rm -rf /tmp/* \
+	&& rm -fr /home/user/tmp/* \
+	&& rm -fr /home/user/.cache/* \
+	&& rm -fr /root/.cache/*
+
+FROM scratch
+COPY --from=builder / /
+WORKDIR /work
+USER user
+CMD /bin/bash

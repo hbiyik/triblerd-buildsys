@@ -50,6 +50,13 @@ config = {"images":
                  "toolchain": {},
                  "targets": ["linux-armhf"]
                  },
+            "linux-arm6hf":
+                {"base": "boogiepy/raspbian-wheezy",
+                 "openssl-platform": "linux-armv4",
+                 "qemu-platform": "arm",
+                 "toolchain": {},
+                 "targets": ["linux-arm6hf"]
+                 },
             "linux-aarch64":
                 {"base": "debian/eol:jessie-slim@sha256:600ca584836c903364017aea8f4ca4af335f04c949a7dd78801477cf3cb6cdc5",
                  "openssl-platform": "linux-aarch64",
@@ -60,14 +67,44 @@ config = {"images":
             "android-buildozer":
                 {"base": "python:3.7-slim-buster@sha256:fecbb1a9695d25c974906263c64ffba6548ce14a169ed36be58331659383c25e",
                  "openssl-platform": "",
-                 "qemu-platform": "x86_64",
                  "toolchain": {},
                  "targets": ["android-i386", "android-amd64", "android-armhf", "android-aarch64"]
                  },
+            "windows-i386":
+                {"base": "debian:buster-slim@sha256:7c459309b9a5ec1683ef3b137f39ce5888f5ad0384e488ad73c94e0243bc77d4",
+                 "openssl-platform": "",
+                 "toolchain": {},
+                 "targets": ["windows-i386"]
+                 },
+# for some reason windows 64 libtorrent does not work when compiled over wine, could be related to winetricks installing 32bit stuff, or some gcc trickery, i dunno
+#            "windows-amd64":
+#                {"base": "debian:buster-slim@sha256:7c459309b9a5ec1683ef3b137f39ce5888f5ad0384e488ad73c94e0243bc77d4",
+#                 "openssl-platform": "",
+#                 "qemu-platform": "x86_64",
+#                 "toolchain": {},
+#                 "targets": ["windows-amd64"]
+#                 },
             },
         "deps":{pname:pval[0] for pname, pval in packages.items()},
         "PYVER": PYVER
         }
+
+dockerargs = {"windows-i386": {"ARCH1": "32",
+                               "ARCH3": "",
+                               "ARCH4": "Win32",
+                               "MINGW": "sjlj/i686-7.3.0-release-posix-sjlj-rt_v5-rev0.7z"},
+              "windows-amd64": {"ARCH1": "64",
+                                "ARCH3":".amd64",
+                                "ARCH4": "x64",
+                                "MINGW": "seh/x86_64-7.3.0-release-posix-seh-rt_v5-rev0.7z"},
+              "linux-armel": {"OPENSSL_ARG1": "", "OPENSSL_ARG2": ""},
+              "linux-armhf": {"OPENSSL_ARG1": "-march=armv7-a", "OPENSSL_ARG2":"-mfpu=neon"},
+              "linux-arm6hf": {"OPENSSL_ARG1": "", "OPENSSL_ARG2": ""},
+              "linux-aarch64": {"OPENSSL_ARG1": "", "OPENSSL_ARG2": ""},
+              "linux-i386": {"OPENSSL_ARG1": "", "OPENSSL_ARG2": ""},
+              "linux-amd64": {"OPENSSL_ARG1": "", "OPENSSL_ARG2": ""},
+              
+              }
 
 targets = {}
 

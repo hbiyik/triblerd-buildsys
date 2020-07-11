@@ -8,15 +8,26 @@ ENV \
 
 # install wine >= 5.10
 # https://bugs.winehq.org/show_bug.cgi?id=46788,https://github.com/giampaolo/psutil/issues/1448
-RUN apt-get update && apt-get install -y apt-transport-https ca-certificates cabextract curl gnupg2 \
-      software-properties-common tzdata unzip msitools p7zip-full nano \
+RUN apt-get update \
+    && apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      cabextract \
+      curl \
+      gnupg2 \
+      software-properties-common \
+      tzdata \
+      unzip \
+      msitools \
+      p7zip-full \ 
+      nano \
     && dpkg --add-architecture i386 \
     && curl -sL https://dl.winehq.org/wine-builds/winehq.key | apt-key add - \
     && apt-add-repository "https://dl.winehq.org/wine-builds/debian/ buster main" \
     && curl -sL https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/Debian_10/Release.key | apt-key add - \
     && echo "deb http://download.opensuse.org/repositories/Emulators:/Wine:/Debian/Debian_10 ./" | tee /etc/apt/sources.list.d/wine-obs.list \
     && apt-get update \
-    && apt-get install -y winehq-staging \
+    && apt-get install -y winehq-staging=5.10~buster \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -fr /tmp/* \
@@ -41,44 +52,87 @@ RUN curl -sL -o /usr/local/bin/winetricks https://raw.githubusercontent.com/Wine
 	&& winetricks -q msls31 \
 	&& winetricks -q win7
 
+ENV WINEPATH=/work/mingw64/bin
+COPY --chown=user:group sources/msysinstaller.py /work/msysinstaller.py
+
+RUN python3 /work/msysinstaller.py amd64 gcc 8.3.0-1 \
+	&& python3 /work/msysinstaller.py amd64 gcc-libs 9.3.0-2 \
+	&& python3 /work/msysinstaller.py amd64 gmp 6.2.0-1 \
+	&& python3 /work/msysinstaller.py amd64 mpc 1.1.0-1 \
+	&& python3 /work/msysinstaller.py amd64 mpfr 4.0.2-2 \
+	&& python3 /work/msysinstaller.py amd64 libwinpthread-git 8.0.0.5814.9dbf4cc1-1 \
+	&& python3 /work/msysinstaller.py amd64 expat 2.2.9-1 \
+	&& python3 /work/msysinstaller.py amd64 bzip2 1.0.8-1 \
+	&& python3 /work/msysinstaller.py amd64 libffi 3.3-1 \
+	&& python3 /work/msysinstaller.py amd64 mpdecimal 2.4.2-1 \
+	&& python3 /work/msysinstaller.py amd64 libsystre 1.0.1-4 \
+	&& python3 /work/msysinstaller.py amd64 ncurses 6.2-1 \
+	&& python3 /work/msysinstaller.py amd64 ca-certificates 20190110-1 \
+	&& python3 /work/msysinstaller.py amd64 libiconv 1.16-1 \
+	&& python3 /work/msysinstaller.py amd64 gettext 0.19.8.1-8 \
+	&& python3 /work/msysinstaller.py amd64 libtasn1 4.16.0-1 \
+	&& python3 /work/msysinstaller.py amd64 p11-kit 0.23.20-1 \
+	&& python3 /work/msysinstaller.py amd64 openssl 1.1.1.g-1 \
+	&& python3 /work/msysinstaller.py amd64 termcap 1.3.1-5 \
+	&& python3 /work/msysinstaller.py amd64 readline 8.0.004-1 \
+	&& python3 /work/msysinstaller.py amd64 sqlite3 3.31.1-1 \
+	&& python3 /work/msysinstaller.py amd64 tcl 8.6.10-1 \
+	&& python3 /work/msysinstaller.py amd64 tk 8.6.10-1 \
+	&& python3 /work/msysinstaller.py amd64 zlib 1.2.11-1 \
+	&& python3 /work/msysinstaller.py amd64 xz 5.2.5-1 \
+	&& python3 /work/msysinstaller.py amd64 libsodium 1.0.18-1 \
+	&& python3 /work/msysinstaller.py amd64 python3 3.8.1-2 \
+	&& python3 /work/msysinstaller.py amd64 python3-appdirs \
+	&& python3 /work/msysinstaller.py amd64 python3-urllib3 \
+	&& python3 /work/msysinstaller.py amd64 python3-cachecontrol\
+	&& python3 /work/msysinstaller.py amd64 python3-colorama \
+	&& python3 /work/msysinstaller.py amd64 python3-contextlib2 \
+	&& python3 /work/msysinstaller.py amd64 python3-distlib \
+	&& python3 /work/msysinstaller.py amd64 python3-html5lib \
+	&& python3 /work/msysinstaller.py amd64 python3-lockfile \
+	&& python3 /work/msysinstaller.py amd64 python3-msgpack \
+	&& python3 /work/msysinstaller.py amd64 python3-attrs \
+	&& python3 /work/msysinstaller.py amd64 python3-packaging \
+	&& python3 /work/msysinstaller.py amd64 python3-pep517 \
+	&& python3 /work/msysinstaller.py amd64 python3-progress \
+	&& python3 /work/msysinstaller.py amd64 python3-pyparsing \
+	&& python3 /work/msysinstaller.py amd64 python3-pytoml \
+	&& python3 /work/msysinstaller.py amd64 python3-certifi \
+	&& python3 /work/msysinstaller.py amd64 python3-chardet \
+	&& python3 /work/msysinstaller.py amd64 python3-idna \
+	&& python3 /work/msysinstaller.py amd64 python3-requests \
+	&& python3 /work/msysinstaller.py amd64 python3-retrying \
+	&& python3 /work/msysinstaller.py amd64 python3-six \
+	&& python3 /work/msysinstaller.py amd64 python3-webencodings \
+	&& python3 /work/msysinstaller.py amd64 python3-pip
 # install winpython + pip
-ARG WINPYTHON_URL=https://github.com/winpython/winpython/releases/download/2.2.20191222/Winpython${ARCH1}-3.8.1.0dot.exe
+
+ARG MSYS2_PYTHON_URL=http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-python3-3.8.1-2-any.pkg.tar.xz
 ARG ARCH3
 RUN cd /work \
-	&& curl -L ${WINPYTHON_URL} -o winpython.exe \
-	&& wine winpython.exe -o"winpythontemp" -y & sleep 20 \
-	&& cd /work \
-	&& mv winpythontemp/WPy${ARCH1}-3810/python-3.8.1${ARCH3} python \
-	&& rm -rf winpythontemp winpython.exe \
-	&& wine python/python.exe -m pip install pip --upgrade \
-	&& cp /work/python/vcruntime140.dll /work/python/libs/
+	&& curl -L ${MSYS2_PYTHON_URL} -o python.tar.xz \
+	&& tar -xf python.tar.xz \
+	&& rm -f python.tar.xz
 
 # patch mingwcompiler to work with wine
-COPY --chown=user:group sources/patches/cygwinccompiler.pywin /work/python/Lib/distutils/cygwinccompiler.py
-
-# install mingw
-ARG MINGW
-ARG MINGW_URL=https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win${ARCH1}/Personal%20Builds/mingw-builds/7.3.0/threads-posix/${MINGW}
+#COPY --chown=user:group sources/patches/cygwinccompiler.pywin /work/python/Lib/distutils/cygwinccompiler.py
 
 RUN cd /work \
-	&& curl -L ${MINGW_URL} -o mingw.7z \
-	&& 7z x mingw.7z \
-	&& rm -f mingw.7z \
-	&& mv mingw${ARCH1} mingw \
-	&& cp /work/mingw/bin/*.dll /work/python/DLLs/
-
-ENV WINEPATH=/work/mingw/bin
+	&& curl -L http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-gcc-8.3.0-1-any.pkg.tar.xz -o target.tar.xz \
+	&& tar -xf target.tar.xz \
+	&& rm -f target.tar.xz
 
 COPY --chown=user:group sources /home/sources
 
 # install precompiled libsodium
 ARG LIBSODIUM_VER
-ARG ARCH4
-RUN cd /home/sources \
-	&& curl -L https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip -o libsodium.zip \
-	&& unzip libsodium.zip \
-	&& cp libsodium/${ARCH4}/Release/v141/dynamic/libsodium.dll ~/.wine/drive_c/windows/system32/libsodium.dll \
-	&& rm -rf libsodium*
+RUN cd /work \
+	&& curl -L http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-libsodium-${LIBSODIUM_VER}-1-any.pkg.tar.xz -o target.tar.xz \
+	&& tar -xf target.tar.xz \
+	&& rm -f target.tar.xz
+
+# patch mingwcompiler to work with wine
+COPY --chown=user:group sources/patches/cygwinccompiler.pywin /work/python/Lib/distutils/cygwinccompiler.py
 
 # b2 batch scripts does not understand wine environemt, so we compile them like a macho man :)
 ARG BOOST_SRC

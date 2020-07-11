@@ -41,6 +41,8 @@ if __name__ == "__main__":
     for dep, depver in configure.config["deps"].items():
         depdata += "--build-arg %s_SRC=/home/%s " % (dep.upper(),
                                                      configure.findsourcedir(dep))
+        depdata += "--build-arg %s_VER=%s " % (dep.upper(),
+                                                     depver)
 
     # load the old toolchain file
     toolchain = dict(configure.config)
@@ -57,6 +59,8 @@ if __name__ == "__main__":
         if image in images:
             imagename = "%s/%s-%s" % (configure.DOCKER_USERNAME, configure.DOCKER_IMAGENAME, image)
             targetos = image.split("-")[0]
+            for argk, argv in configure.dockerargs.get(image, {}).items():
+                depdata += "--build-arg %s=%s " % (argk, argv)
             cmd = "docker build -t %s \
                   %s \
                   --build-arg BASE=%s \
@@ -67,7 +71,7 @@ if __name__ == "__main__":
                   -f %s.dockerfile ." % (imagename,
                                         depdata,
                                         cfg["base"],
-                                        cfg["qemu-platform"],
+                                        cfg.get("qemu-platform", ""),
                                         str(multiprocessing.cpu_count()),
                                         configure.config["PYVER"],
                                         cfg["openssl-platform"],

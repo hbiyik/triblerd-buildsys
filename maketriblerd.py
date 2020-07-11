@@ -47,10 +47,14 @@ else:
 docker_dir = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
 
 
-def runindocker(cmd, container, dirmap=None, hostnetwork=False, privileged=True, paths=None):
+def runindocker(cmd, container, dirmap=None, hostnetwork=False, privileged=True, paths=None, wine=False):
     if paths:
-        paths = "export PYTHONPATH=$PYTHONPATH:%s" % ":".join(paths)
-        cmd = "%s && export && %s" % (paths, cmd)
+        if wine:
+            paths = "set PYTHONPATH=%s" % ";".join(paths)
+            cmd = 'wine cmd /c \\"%s & set & %s\\"' % (paths, cmd)
+        else:
+            paths = "export PYTHONPATH=$PYTHONPATH:%s" % ":".join(paths)
+            cmd = "%s && export && %s" % (paths, cmd)
     dockercmd = 'docker run -ti %s %s %s\
                  %s/triblerd-%s \
                  /bin/bash -c "%s"' % ("--network host" if hostnetwork else "",
@@ -60,6 +64,7 @@ def runindocker(cmd, container, dirmap=None, hostnetwork=False, privileged=True,
                                        container,
                                        cmd)
     logging.info("Running in docker(%s): %s" % (container, cmd))
+    print(dockercmd)
     return os.system(dockercmd)
 
    
@@ -67,33 +72,59 @@ def build(target, container):
     ostype, _ = container.split("-")
     # map tribler source dir
     drvmap =  [(root_dir, "/work/tribler")]
-    if ostype == "linux":
+    if ostype == "windows":
+        paths = ["Z:\\work\\tribler\\src\\anydex",
+                 "Z:\\work\\tribler\\src\\tribler-common",
+                 "Z:\\work\\tribler\\src\\tribler-core",
+                 "Z:\\work\\tribler\\src\\pyipv8"]
+        if args.debugrun:
+            pycmd = "Z:\\work\\python\\python Z:\\work\\tribler\\src\\tribler-core\\run_tribler_headless.py -p 8085"
+        elif args.test:
+            drvmap.append((os.path.join(docker_dir, "utils", "testrunner.py"), "/work/testrunner.py"))
+            pycmd = "Z:\\work\\python\\python Z:\\work\\testrunner.py --srcdir=Z:\\work\\tribler"
+        else:
+            drvmap.append((os.path.join(docker_dir, "dist"), "/work/dist"))
+            drvmap.append((os.path.join(docker_dir, "triblerd.spec"), "/work/triblerd.spec"))
+            pycmd = "Z:\\work\\python\\python -m PyInstaller Z:\\work\\triblerd.spec -y --onefile \
+                    --distpath Z:\\work\\dist\\triblerd-%s" % container
+        if not runindocker(pycmd,
+                           container,
+                           drvmap,
+                           True,
+                           False,
+                           paths,
+                           True) and not args.debugrun and not args.test:
+            return "dist/triblerd-%s/triblerd.exe" % container
+
+    elif ostype in "linux":
         paths = ["/work/tribler/src/anydex",
                  "/work/tribler/src/tribler-common",
                  "/work/tribler/src/tribler-core",
                  "/work/tribler/src/pyipv8"]
-        # map release directory to pyinstaller release directory
-        drvmap.append((os.path.join(docker_dir, "dist"), "/work/tribler/dist"))
-        # map pyinstaller spec file to source root directoy,
-        # this is different that tribler spec file since it is aiming only the headless tribler
-        drvmap.append((os.path.join(docker_dir, "triblerd.spec"), "/work/tribler/triblerd.spec"))
         if args.debugrun:
-            pycmd = "python3 ./src/tribler-core/run_tribler_headless.py -p 8085"
+            pycmd = "python3 /work/tribler/src/tribler-core/run_tribler_headless.py -p 8085"
         elif args.test:
             # map test runner to tribler source root
-            drvmap.append((os.path.join(docker_dir, "utils", "testrunner.py"), "/work/tribler/testrunner.py"))
-            pycmd = "python3 ./testrunner.py --srcdir=."
+            drvmap.append((os.path.join(docker_dir, "utils", "testrunner.py"), "/work/testrunner.py"))
+            pycmd = "python3 /work/testrunner.py --srcdir=/work/tribler"
         else:
-            pycmd = "python3 -m PyInstaller triblerd.spec -y --onefile --distpath dist/triblerd-%s" % container
-        if not runindocker("cd /work/tribler && %s && chown -R 1000 dist/" % pycmd,
-                            container,
-                            drvmap,
-                            True,
-                            False,
-                            paths):
+            # map release directory to pyinstaller release directory
+            drvmap.append((os.path.join(docker_dir, "dist"), "/work/dist"))
+            # map pyinstaller spec file to source root directoy,
+            # this is different that tribler spec file since it is aiming only the headless tribler
+            drvmap.append((os.path.join(docker_dir, "triblerd.spec"), "/work/triblerd.spec"))
+            pycmd = "python3 -m PyInstaller /work/triblerd.spec -y --onefile \
+                    --distpath /work/dist/triblerd-%s" % container
+        if not runindocker(pycmd,
+                           container,
+                           drvmap,
+                           True,
+                           False,
+                           paths) and not args.test and not args.debugrun:
             
             # return the path for generated file
             return "dist/triblerd-%s/triblerd" % container
+
     elif ostype == "android":
         # map release directory to buildozer release directory
         drvmap.append((os.path.join(docker_dir, "dist"), "/work/buildozer/dist"))

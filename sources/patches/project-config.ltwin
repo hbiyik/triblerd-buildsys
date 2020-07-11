@@ -1,0 +1,2 @@
+using gcc : 8 : Z:\\work\\mingw\\bin\\g++.exe ; 
+using python : 3.8 : Z:\\work\\python\\python.exe ;
