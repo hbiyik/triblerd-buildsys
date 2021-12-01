@@ -12,8 +12,8 @@
         "https://github.com/arvidn/libtorrent/archive/libtorrent-1_1_5.tar.gz"
     ],
     "cryptography": [
-        "2.8",
-        "https://github.com/pyca/cryptography/archive/2.8.tar.gz"
+        "3.3",
+        "https://github.com/pyca/cryptography/archive/3.3.tar.gz"
     ],
     "python": [
         "3.8.1",
