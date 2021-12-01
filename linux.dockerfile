@@ -69,11 +69,29 @@ ARG CRYPTOGRAPHY_SRC
 RUN	python${PYVER} -m pip install -v --no-binary :all: pycparser cffi && \
 	cp /home/sources/patches/osrandom_engine.cry ${CRYPTOGRAPHY_SRC}/src/_cffi_src/openssl/src/osrandom_engine.c && \
 	cd ${CRYPTOGRAPHY_SRC} && python${PYVER} setup.py install && \
-	python${PYVER} -m pip install -v wheel bitcoinlib chardet configobj decorator dnspython \
-	ecdsa feedparser jsonrpclib netifaces networkx pbkdf2 pony protobuf psutil \
-	pyaes pyasn1 pysocks requests PyOpenSSL libnacl service_identity \
-	networkx aiohttp aiohttp_apispec pyyaml marshmallow netifaces asynctest PyInstaller==4.3 nose && \
-	python${PYVER} -m pip install --no-binary :all: lz4
+	python${PYVER} -m pip install -v \
+	aiohttp==3.8.1 \
+	aiohttp-apispec==2.2.1 \
+	anyio==3.3.4 \
+	chardet==4.0.0 \
+	configobj==5.0.6 \
+	decorator==5.1.0 \
+	Faker==9.8.2 \
+	libnacl==1.8.0 \
+	lz4==3.1.3 \
+	marshmallow==3.14.1 \
+	netifaces==0.11.0 \
+	networkx==2.6.3 \
+	pony==0.7.14 \
+	psutil==5.8.0 \
+	pyasn1==0.4.8 \
+	pydantic==1.8.2 \
+	PyOpenSSL==21.0.0 \
+	pyyaml==6.0 \
+	sentry-sdk==1.5.0 \
+	service-identity==21.1.0 \
+	yappi==1.3.3 \
+	PyInstaller==4.3
 
 USER root
 # clean system
