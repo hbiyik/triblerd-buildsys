@@ -66,13 +66,13 @@ RUN cd ${BOOST_SRC} && ./bootstrap.sh && \
 	cp ${LIBTORRENT_SRC}/bin/gcc-*/release/libtorrent-python-pic-on/threading-multi/*.so* /usr/lib/ && \
 	cp ${LIBTORRENT_SRC}/bindings/python/bin/gcc-*/release/libtorrent-python-pic-on/lt-visibility-hidden/*.so* /usr/local/lib/python${PYVER}/site-packages/
 ARG CRYPTOGRAPHY_SRC
-RUN	python${PYVER} -m pip install --no-binary :all: pycparser cffi && \
+RUN	python${PYVER} -m pip install -v --no-binary :all: pycparser cffi && \
 	cp /home/sources/patches/osrandom_engine.cry ${CRYPTOGRAPHY_SRC}/src/_cffi_src/openssl/src/osrandom_engine.c && \
 	cd ${CRYPTOGRAPHY_SRC} && python${PYVER} setup.py install && \
-	python${PYVER} -m pip install --no-binary :all: wheel bitcoinlib chardet configobj decorator dnspython \
+	python${PYVER} -m pip install -v wheel bitcoinlib chardet configobj decorator dnspython \
 	ecdsa feedparser jsonrpclib netifaces networkx pbkdf2 pony protobuf psutil \
 	pyaes pyasn1 pysocks requests PyOpenSSL libnacl service_identity \
-	networkx aiohttp aiohttp_apispec pyyaml marshmallow netifaces asynctest PyInstaller nose && \
+	networkx aiohttp aiohttp_apispec pyyaml marshmallow netifaces asynctest PyInstaller==4.3 nose && \
 	python${PYVER} -m pip install --no-binary :all: lz4
 
 USER root
