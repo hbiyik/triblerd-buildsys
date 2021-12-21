@@ -77,8 +77,9 @@ def build(target, container):
                  "Z:\\work\\tribler\\src\\tribler-common",
                  "Z:\\work\\tribler\\src\\tribler-core",
                  "Z:\\work\\tribler\\src\\pyipv8"]
+        drvmap.append((os.path.join(docker_dir, "triblerd.py"), "/work/triblerd.py"))
         if args.debugrun:
-            pycmd = "Z:\\work\\python\\python Z:\\work\\tribler\\src\\tribler-core\\run_tribler_headless.py -p 8085"
+            pycmd = "Z:\\work\\python\\python Z:\\work\\triblerd.py -p 8085 -s Z:\\tmp\\triblerstate -k 12345678"
         elif args.test:
             drvmap.append((os.path.join(docker_dir, "utils", "testrunner.py"), "/work/testrunner.py"))
             pycmd = "Z:\\work\\python\\python Z:\\work\\testrunner.py --srcdir=Z:\\work\\tribler"
@@ -101,8 +102,9 @@ def build(target, container):
                  "/work/tribler/src/tribler-common",
                  "/work/tribler/src/tribler-core",
                  "/work/tribler/src/pyipv8"]
+        drvmap.append((os.path.join(docker_dir, "triblerd.py"), "/work/triblerd.py"))
         if args.debugrun:
-            pycmd = "python3 /work/tribler/src/tribler-core/run_tribler_headless.py -p 8085"
+            pycmd = "python3 /work/triblerd.py -p 8085 -s /tmp/triblerstate -k 12345678"
         elif args.test:
             # map test runner to tribler source root
             drvmap.append((os.path.join(docker_dir, "utils", "testrunner.py"), "/work/testrunner.py"))

@@ -15,6 +15,7 @@ from tribler_core.version import version_id
 version_str = version_id.split('-')[0]
 
 data_to_copy = [
+    (os.path.join(src_dir, "tribler-common", "tribler_common"), 'tribler_source/tribler_common'),
     (os.path.join(src_dir, "tribler-core", "tribler_core"), 'tribler_source/tribler_core'),
     (os.path.dirname(aiohttp_apispec.__file__), 'aiohttp_apispec')
 ]
@@ -30,7 +31,7 @@ except ImportError:
 excluded_libs = ['wx', 'bitcoinlib', 'PyQt4', 'FixTk', 'tcl', 'tk', '_tkinter', 'tkinter', 'Tkinter', 'matplotlib']
 
 
-a = Analysis([os.path.join(src_dir, "tribler-core", "run_tribler_headless.py")],
+a = Analysis([os.path.join(os.path.dirname(__name__), "triblerd.py")],
              pathex=[''],
              binaries=None,
              datas=data_to_copy,

@@ -125,40 +125,44 @@ RUN cd /home/sources \
 # pyinstaller 3.5 has issue: https://github.com/pyinstaller/pyinstaller/issues/4265
 # pyinstaller 3.6 has issue: https://github.com/pyinstaller/pyinstaller/issues/4628
 # thus we use a version in the middle: commit 9dd34bdfbaeaa4e0459bd3051d1caf0c7d75073f
-ARG CRYPTOGRAPHY_VER	
-RUN wine /work/python/python -m pip install \ 
-	lz4 \
-	cryptography==${CRYPTOGRAPHY_VER} \
-	PyWin32 \
-	wheel \
-	chardet \
-	decorator \
-	dnspython \
-	ecdsa \
-	feedparser \
-	jsonrpclib \
-	networkx \
-	pony \
-	protobuf \
-	psutil \
-	pyaes \
-	pyasn1 \
-	pysocks \
-	requests \
-	PyOpenSSL \
-	libnacl \
-	service_identity \
-	aiohttp \
-	aiohttp_apispec \
-	pyyaml \
-	marshmallow \
-	asynctest \
-	nose \
-	pbkdf2 \
-	configobj \
-	&& wine /work/python/python -m pip install --global-option build_ext --global-option --compiler=mingw32 \ 
-	https://github.com/pyinstaller/pyinstaller/archive/9dd34bdfbaeaa4e0459bd3051d1caf0c7d75073f.zip \
-	netifaces
+ARG CRYPTOGRAPHY_VER
+# use old version of setuptools (should be <= 59.0.1) for yappi which does not push ucrt lib in mingw32 compiler
+RUN wine /work/python/python -m pip install -v --global-option build_ext --global-option --compiler=mingw32 yappi==1.3.3 && \
+	wine /work/python/python -m pip install setuptools -U && \
+	wine /work/python/python -m pip install -v \ 
+	aiohttp==3.8.1 \
+	aiohttp-apispec==2.2.1 \
+	anyio==3.3.4 \
+	chardet==4.0.0 \
+	configobj==5.0.6 \
+	decorator==5.1.0 \
+	Faker==9.8.2 \
+	libnacl==1.8.0 \
+	lz4==3.1.3 \
+	marshmallow==3.14.1 \
+	netifaces==0.11.0 \
+	networkx==2.6.3 \
+	pony==0.7.14 \
+	psutil==5.8.0 \
+	pyasn1==0.4.8 \
+	pydantic==1.8.2 \
+	PyOpenSSL==21.0.0 \
+	pyyaml==6.0 \
+	sentry-sdk==1.5.0 \
+	service-identity==21.1.0 \
+	PyInstaller==4.2 \
+	pytest==6.2.5 \
+	pytest-aiohttp==0.3.0 \
+	pytest-asyncio==0.16.0 \
+	pytest-cov==3.0.0 \
+	pytest-mock==3.6.1 \
+	pytest-randomly==3.10.2 \
+	pytest-timeout==2.0.1 \
+	pytest-xdist==2.4.0 \
+	pytest-freezegun==0.4.2 \
+	freezegun==1.1.0 \
+	asynctest==0.13.0
+	# https://github.com/pyinstaller/pyinstaller/archive/9dd34bdfbaeaa4e0459bd3051d1caf0c7d75073f.zip
 USER root
 # clean system
 RUN python3 /home/sources/cleandeb.py winehq-staging apt e2fsprogs fdisk base-passwd \
