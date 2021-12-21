@@ -3,6 +3,7 @@
 	<name>triblerd-buildsys</name>
 	<comment></comment>
 	<projects>
+		<project>tribler</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
