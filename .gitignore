@@ -14,3 +14,4 @@ __pycache__
 /sources/libffi*
 /sources/cryptography*
 /sources/sqlite*
+*.so

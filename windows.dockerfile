@@ -150,7 +150,6 @@ RUN wine /work/python/python -m pip install -v --global-option build_ext --globa
 	pyyaml==6.0 \
 	sentry-sdk==1.5.0 \
 	service-identity==21.1.0 \
-	PyInstaller==4.2 \
 	pytest==6.2.5 \
 	pytest-aiohttp==0.3.0 \
 	pytest-asyncio==0.16.0 \
@@ -161,8 +160,9 @@ RUN wine /work/python/python -m pip install -v --global-option build_ext --globa
 	pytest-xdist==2.4.0 \
 	pytest-freezegun==0.4.2 \
 	freezegun==1.1.0 \
-	asynctest==0.13.0
-	# https://github.com/pyinstaller/pyinstaller/archive/9dd34bdfbaeaa4e0459bd3051d1caf0c7d75073f.zip
+	asynctest==0.13.0 \
+	# PyInstaller==4.7
+	https://github.com/pyinstaller/pyinstaller/archive/9dd34bdfbaeaa4e0459bd3051d1caf0c7d75073f.zip
 USER root
 # clean system
 RUN python3 /home/sources/cleandeb.py winehq-staging apt e2fsprogs fdisk base-passwd \

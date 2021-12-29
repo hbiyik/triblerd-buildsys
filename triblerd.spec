@@ -4,6 +4,8 @@ import imp
 import os
 import sys
 import shutil
+import sentry_sdk
+import pkgutil
 
 import aiohttp_apispec
 
@@ -31,6 +33,16 @@ except ImportError:
 excluded_libs = ['wx', 'bitcoinlib', 'PyQt4', 'FixTk', 'tcl', 'tk', '_tkinter', 'tkinter', 'Tkinter', 'matplotlib']
 
 
+def get_sentry_hooks():
+    package = sentry_sdk.integrations
+    sentry_hooks = ['sentry_sdk', 'sentry_sdk.integrations']
+    for _, modname, _ in pkgutil.walk_packages(path=package.__path__,
+                                               prefix=package.__name__ + '.',
+                                               onerror=lambda x: None):
+        sentry_hooks.append(modname)
+    return sentry_hooks
+
+
 a = Analysis([os.path.join(os.path.dirname(__name__), "triblerd.py")],
              pathex=[''],
              binaries=None,
@@ -40,7 +52,7 @@ a = Analysis([os.path.join(os.path.dirname(__name__), "triblerd.py")],
                             'pony.orm.dbproviders',
                             'pony.orm.dbproviders.sqlite',
                             'pkg_resources.py2_warn',
-							'certifi'],
+							'certifi'] + get_sentry_hooks(),
              hookspath=[],
              runtime_hooks=[],
              excludes=excluded_libs,
